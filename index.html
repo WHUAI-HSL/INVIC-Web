@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHUAI · INVIC</title>
+    <link rel="stylesheet" href="markdown-styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'apple-bg': '#000000',
+                        'apple-card': 'rgba(28, 28, 30, 0.6)',
+                        'apple-text': '#f5f5f7',
+                        'apple-gray': '#86868b',
+                        'apple-blue': '#2997ff',
+                    },
+                    fontFamily: { sans: ['SF Pro Display', '-apple-system', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Site Configuration and Content Loader -->
+    <script src="config.js"></script>
+    <script src="content-loader.js"></script>
+    
+    <style>
+        body::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; background-color: #000; color: #f5f5f7; }
+        .h-screen-safe { height: 100vh; }
+        
+        .nav-fixed {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+            background: rgba(0,0,0,0); border-bottom: 1px solid transparent;
+            transition: all 0.4s ease;
+        }
+        .nav-scrolled {
+            background: rgba(0, 0, 0, 0.8) !important;
+            backdrop-filter: blur(20px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+        .menu-pill {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .nav-item { color: #86868b; transition: color 0.3s ease; }
+        .nav-item:hover { color: #ffffff; }
+        .nav-item.active { color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.4); }
+
+        .ambient-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center; z-index: 0; pointer-events: none;
+            mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+        }
+        .bg-fluid { background-image: url('assets/fluid-bg.png'); opacity: 0.4; }
+        .bg-smoke { background-image: url('assets/smoke-bg.png'); opacity: 0.5; filter: hue-rotate(15deg); }
+
+        .bento-card {
+            background: rgba(28, 28, 30, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .bento-card:hover {
+            border-color: rgba(41, 151, 255, 0.5);
+            transform: translateY(-4px);
+        }
+
+        /* 模态框样式 - 使用CSS动画 */
+        .card-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90vw;
+            height: 85vh;
+            max-width: 1200px;
+            background: linear-gradient(135deg, #1c1c1e 0%, #2a2a2e 100%);
+            border-radius: 40px;
+            z-index: 10000;
+            overflow-y: auto;
+            padding: 60px 40px 40px 40px;
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255,255,255,0.15);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .card-modal.active {
+            display: block !important;
+            animation: modalFadeIn 0.4s ease forwards;
+        }
+        
+        @keyframes modalFadeIn {
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+        
+        .card-modal::-webkit-scrollbar { width: 8px; }
+        .card-modal::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        .card-modal::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            display: block !important;
+            animation: overlayFadeIn 0.3s ease forwards;
+        }
+        
+        @keyframes overlayFadeIn {
+            to { opacity: 1; }
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(60, 60, 60, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10001;
+            color: white;
+            font-size: 20px;
+        }
+        .modal-close:hover { background: rgba(100, 100, 100, 0.8); transform: scale(1.1); }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(41, 151, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .chart-bar {
+            background: linear-gradient(135deg, #2997ff 0%, #0066cc 100%);
+            transition: all 0.6s ease;
+            border-radius: 8px;
+        }
+        
+        .skill-tag {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(41, 151, 255, 0.1);
+            border: 1px solid rgba(41, 151, 255, 0.3);
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 4px;
+            transition: all 0.3s ease;
+        }
+        .skill-tag:hover {
+            background: rgba(41, 151, 255, 0.2);
+            border-color: rgba(41, 151, 255, 0.5);
+        }
+
+        .plus-btn {
+            position: absolute; bottom: 30px; right: 30px;
+            width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .bento-card:hover .plus-btn { background: #2997ff; transform: scale(1.1) rotate(90deg); border-color: #2997ff; }
+
+        .cursor { display: inline-block; width: 2px; height: 1em; background-color: #2997ff; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .reveal-item, .hero-anim { opacity: 0; transform: translateY(40px); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="antialiased selection:bg-apple-blue selection:text-white">
+
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <nav class="nav-fixed" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 shrink-0">
+                <a href="#" class="text-2xl font-bold text-white tracking-wider hover:text-apple-blue transition-colors">INVIC</a>
+                <div class="h-4 w-[1px] bg-white/20"></div> 
+                <div class="flex flex-col justify-center leading-none text-apple-gray">
+                    <span class="text-[10px] font-bold tracking-widest uppercase">WHUAI</span>
+                    <span class="text-[9px] tracking-wide opacity-70">Wuhan University</span>
+                </div>
+            </div>
+
+            <div class="menu-pill flex items-center gap-1 rounded-full px-3 py-1.5 mx-2 overflow-x-auto scrollbar-hide max-w-[50vw] sm:max-w-none">
+                <a href="#hero" class="nav-item whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-all">Home</a>
+                <a href="#bento" class="nav-item whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-all">Team</a>
+                <a href="#research" class="nav-item whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-all">Research</a>
+                <a href="#events" class="nav-item whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-all">Timeline</a>
+                <a href="#gallery" class="nav-item whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-all">Gallery</a>
+            </div>
+
+            <div class="flex items-center gap-5 shrink-0">
+                <a href="https://github.com/YourGithubRepo" target="_blank" class="text-gray-400 hover:text-white transition-colors group" title="GitHub">
+                    <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                </a>
+                <a href="mailto:contact@whu.edu.cn" class="text-gray-400 hover:text-white transition-colors group" title="Contact Us">
+                    <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <section id="hero" class="relative h-screen-safe flex flex-col justify-center items-center text-center overflow-hidden">
+        <div class="absolute inset-0 z-0 opacity-60">
+            <img src="assets/hero-bg.png" class="w-full h-full object-cover scale-110 hero-bg-img" onerror="this.style.display='none'">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black"></div>
+        </div>
+        <div class="relative z-20 px-4 max-w-5xl mx-auto flex flex-col items-center">
+            <h1 class="hero-anim text-6xl md:text-9xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 drop-shadow-2xl">
+                WHUAI · INVIC
+            </h1>
+            <div class="hero-anim text-xl md:text-3xl text-apple-gray font-light mb-12 h-10 flex items-center justify-center">
+                <span id="typewriter"></span><span class="cursor"></span>
+            </div>
+            <div class="hero-anim mt-4">
+                <a href="#story" class="bg-apple-blue/90 backdrop-blur-md hover:bg-apple-blue text-white px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(41,151,255,0.4)] border border-white/10">
+                    View Our Journey
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="story" class="relative bg-black py-20">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row">
+            <div class="w-full md:w-1/2 px-6 md:pl-20 relative z-10">
+                <div class="story-text h-screen flex flex-col justify-center opacity-0 transition-all duration-500">
+                    <span class="text-apple-blue font-bold uppercase mb-4 tracking-widest text-sm md:text-base">THE ORIGIN</span>
+                    <h2 class="text-5xl md:text-6xl font-bold mb-6 text-white leading-tight">Six Minds.<br>Four Disciplines.</h2>
+                    <p class="text-2xl md:text-3xl text-white font-medium leading-relaxed">Hailing from the Schools of EE, Automation, Robotics, and Surveying. We leverage interdisciplinary diversity to dissolve technical barriers.</p>
+                </div>
+                <div class="story-text h-screen flex flex-col justify-center opacity-0 transition-all duration-500">
+                    <span class="text-apple-blue font-bold uppercase mb-4 tracking-widest text-sm md:text-base">ENGINEERING</span>
+                    <h2 class="text-5xl md:text-6xl font-bold mb-6 text-white leading-tight">Solid Expertise.<br>Robust Innovation.</h2>
+                    <p class="text-2xl md:text-3xl text-white font-medium leading-relaxed">Backed by WHU's Engineering Training Center, we translate professional guidance into mature, field-proven robotic capabilities.</p>
+                </div>
+                <div class="story-text h-screen flex flex-col justify-center opacity-0 transition-all duration-500">
+                    <span class="text-apple-blue font-bold uppercase mb-4 tracking-widest text-sm md:text-base">OUR SPIRIT</span>
+                    <h2 class="text-5xl md:text-6xl font-bold mb-6 text-white leading-tight">Seamless.<br>Synchronized.</h2>
+                    <p class="text-2xl md:text-3xl text-white font-medium leading-relaxed">Guided by 'Self-reliance, Perseverance, Truth-seeking, and Innovation.' Efficient collaboration is our code; adaptability is our engine.</p>
+                </div>
+            </div>
+            <div class="w-full md:w-1/2 h-[50vh] md:h-screen sticky top-0 flex items-center justify-center overflow-hidden">
+                <div class="relative w-4/5 h-4/5">
+                    <img src="assets/Robot_1.png" class="visual-img absolute inset-0 w-full h-full object-contain transition-opacity duration-500 opacity-90 scale-100">
+                    <img src="assets/robot-explode.png" class="visual-img absolute inset-0 w-full h-full object-contain transition-opacity duration-500 opacity-0 scale-90">
+                    <div class="visual-img absolute inset-0 w-full h-full flex items-center justify-center opacity-0 scale-90 transition-opacity duration-500 bg-black">
+                         <div class="w-64 h-64 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 blur-[80px] opacity-60"></div>
+                         <h3 class="relative z-10 text-6xl font-bold text-white">SWARM</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="bento" class="relative bg-black py-32 px-4">
+        <div class="ambient-bg bg-fluid"></div>
+
+        <div class="max-w-6xl mx-auto relative z-10">
+            <h2 class="reveal-item text-center text-5xl md:text-7xl font-bold mb-4">Unrivaled Performance.</h2>
+            <p class="reveal-item text-center text-apple-gray mb-16 text-xl">Tap any card to explore details.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[400px]">
+                
+                <div class="reveal-item bento-card rounded-[40px] cursor-pointer overflow-hidden relative group transition-transform duration-300 hover:scale-[1.02]" onclick="openModal('modal1')">
+                    <div class="relative z-10 h-full flex flex-col justify-between p-10 pointer-events-none">
+                        <div><span class="text-xs font-bold text-apple-gray uppercase tracking-widest">THE SQUAD</span><h3 class="text-4xl font-semibold mt-2 group-hover:text-apple-blue transition-colors">Multidisciplinary Powerhouse.</h3></div>
+                        <p class="text-apple-gray text-lg">Six elite students uniting diverse expertise.</p>
+                    </div>
+                    <div class="plus-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
+                </div>
+
+                <div class="reveal-item bento-card md:col-span-2 rounded-[40px] cursor-pointer relative overflow-hidden group transition-transform duration-300 hover:scale-[1.02]" onclick="openModal('modal2')">
+                    <div class="relative z-10 flex justify-between items-start p-10 pointer-events-none">
+                        <div><span class="text-xs font-bold text-apple-gray uppercase tracking-widest">ACHIEVEMENTS</span><h3 class="text-4xl font-semibold mt-2">National Dominance.</h3></div>
+                        <div class="text-right"><span class="block text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-yellow-400 to-orange-600">#1</span><span class="text-apple-gray">National First Prize</span></div>
+                    </div>
+                    <div class="flex items-end gap-4 h-32 mt-10 px-10 pointer-events-none">
+                        <div class="flex-1 bg-neutral-800 rounded-t-lg h-[30%] group-hover:h-[40%] transition-all duration-700"></div>
+                        <div class="flex-1 bg-neutral-700 rounded-t-lg h-[50%] group-hover:h-[60%] transition-all duration-700 delay-100"></div>
+                        <div class="flex-1 bg-apple-blue rounded-t-lg h-[100%] shadow-[0_0_30px_rgba(41,151,255,0.4)]"></div>
+                    </div>
+                    <div class="plus-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
+                </div>
+
+                <div class="reveal-item bento-card md:col-span-2 rounded-[40px] flex flex-col justify-center group cursor-pointer relative overflow-hidden transition-transform duration-300 hover:scale-[1.02]" onclick="openModal('modal3')">
+                    <div class="z-10 p-10 pointer-events-none">
+                        <span class="text-xs font-bold text-apple-gray uppercase tracking-widest">CAPABILITY</span>
+                        <h3 class="text-5xl font-semibold mt-2">Mature & Adaptive.</h3>
+                    </div>
+                    <div class="font-mono text-green-500 text-sm opacity-50 hidden md:block mt-4 px-10 pointer-events-none">> status: field_proven<span class="animate-pulse">_</span></div>
+                    <div class="plus-btn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
+                </div>
+
+                <div class="reveal-item bento-card bg-gradient-to-br from-apple-blue to-blue-900 rounded-[40px] flex flex-col justify-center items-center text-center group cursor-pointer relative transition-transform duration-300 hover:scale-[1.02]" onclick="openModal('modal4')">
+                    <h3 class="text-4xl font-bold text-white mb-2 pointer-events-none">Truth<br>Seeking.</h3>
+                    <div class="plus-btn" style="background: rgba(255,255,255,0.2);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="research" class="relative bg-black py-32 border-t border-white/10 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <h2 class="reveal-item text-4xl md:text-6xl font-bold mb-12 text-white">Research & Publications.</h2>
+            <div class="flex flex-col gap-4" id="publications-list">
+                <!-- Publications will be loaded here automatically -->
+                <div class="reveal-item text-center mt-10 text-apple-gray text-sm">Loading publications...</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="events" class="relative bg-black py-32 overflow-hidden">
+        <div class="ambient-bg bg-smoke"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <h2 class="reveal-item text-4xl md:text-6xl font-bold mb-12 text-white">Events Timeline.</h2>
+            <div class="reveal-item border-l-2 border-white/10 ml-4 pl-10 space-y-12" id="events-timeline">
+                <!-- Events will be loaded here automatically -->
+                <div class="text-apple-gray text-sm">Loading events...</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery" class="relative bg-black py-32 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="reveal-item text-4xl md:text-6xl font-bold mb-12 text-white">Gallery.</h2>
+            <div class="reveal-item flex gap-6 overflow-x-auto pb-10 scrollbar-hide" id="gallery-grid">
+                <!-- Gallery images will be loaded here automatically -->
+                <div class="min-w-[300px] h-[400px] bg-neutral-800 rounded-2xl flex items-center justify-center text-gray-500 border border-white/10">Loading gallery...</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="relative h-[80vh] flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="assets/vision-bg.png" class="w-full h-full object-cover footer-parallax" onerror="this.style.display='none'">
+            <div class="absolute inset-0 bg-black/60"></div>
+        </div>
+        <div class="relative z-10 text-center flex flex-col items-center">
+            <h2 class="text-7xl md:text-9xl font-black text-white mix-blend-overlay opacity-0 footer-text">INNOVATION</h2>
+            <div class="mt-12 flex flex-col md:flex-row items-center gap-6 text-apple-gray text-lg">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    <span>Wuhan University</span>
+                </div>
+                <span class="hidden md:inline">·</span>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span>China</span>
+                </div>
+            </div>
+            <p class="text-white/40 mt-6 text-sm">© 2026 INVIC · WHUAI. All Rights Reserved.</p>
+        </div>
+    </section>
+
+    <!-- Modal 1: Team -->
+    <div class="card-modal" id="modal1">
+        <div class="modal-close" onclick="closeModal('modal1')">✕</div>
+        <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 3rem; font-weight: bold; margin-bottom: 16px; background: linear-gradient(to right, white, #9ca3af); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Interdisciplinary Fusion</h2>
+            <p style="font-size: 1.25rem; color: #86868b;">Six brilliant minds from four distinct engineering disciplines, united by a common vision.</p>
+        </div>
+        
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 40px 0;">
+        
+        <div style="margin-bottom: 40px;">
+            <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">Team Composition</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 32px;">
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 2.25rem; font-weight: bold; color: #2997ff; margin-bottom: 8px;">2</div>
+                    <div style="font-size: 0.875rem; color: #86868b;">Electrical Engineering</div>
+                </div>
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 2.25rem; font-weight: bold; color: #a855f7; margin-bottom: 8px;">2</div>
+                    <div style="font-size: 0.875rem; color: #86868b;">Automation</div>
+                </div>
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 2.25rem; font-weight: bold; color: #10b981; margin-bottom: 8px;">1</div>
+                    <div style="font-size: 0.875rem; color: #86868b;">Robotics</div>
+                </div>
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 2.25rem; font-weight: bold; color: #f97316; margin-bottom: 8px;">1</div>
+                    <div style="font-size: 0.875rem; color: #86868b;">Surveying</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 40px;">
+            <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">Core Expertise</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+                <div class="stat-card">
+                    <h4 style="font-size: 1.25rem; font-weight: bold; color: white; margin-bottom: 12px; display: flex; align-items: center;">
+                        <span style="width: 8px; height: 8px; background: #2997ff; border-radius: 50%; margin-right: 12px;"></span>
+                        Algorithm Team
+                    </h4>
+                    <p style="color: #86868b; margin-bottom: 16px;">Developing cutting-edge autonomous navigation systems</p>
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-between; font-size: 0.875rem; margin-bottom: 4px;">
+                            <span style="color: white;">Visual SLAM</span>
+                            <span style="color: #86868b;">95%</span>
+                        </div>
+                        <div style="width: 100%; background: #2a2a2e; border-radius: 999px; height: 8px;">
+                            <div class="chart-bar" style="width: 95%; height: 8px;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-between; font-size: 0.875rem; margin-bottom: 4px;">
+                            <span style="color: white;">Path Planning</span>
+                            <span style="color: #86868b;">92%</span>
+                        </div>
+                        <div style="width: 100%; background: #2a2a2e; border-radius: 999px; height: 8px;">
+                            <div class="chart-bar" style="width: 92%; height: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <h4 style="font-size: 1.25rem; font-weight: bold; color: white; margin-bottom: 12px; display: flex; align-items: center;">
+                        <span style="width: 8px; height: 8px; background: #a855f7; border-radius: 50%; margin-right: 12px;"></span>
+                        Hardware Team
+                    </h4>
+                    <p style="color: #86868b; margin-bottom: 16px;">Building robust, competition-grade robotic platforms</p>
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-between; font-size: 0.875rem; margin-bottom: 4px;">
+                            <span style="color: white;">Embedded Systems</span>
+                            <span style="color: #86868b;">93%</span>
+                        </div>
+                        <div style="width: 100%; background: #2a2a2e; border-radius: 999px; height: 8px;">
+                            <div style="width: 93%; height: 8px; background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); border-radius: 8px;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-between; font-size: 0.875rem; margin-bottom: 4px;">
+                            <span style="color: white;">Circuit Design</span>
+                            <span style="color: #86868b;">90%</span>
+                        </div>
+                        <div style="width: 100%; background: #2a2a2e; border-radius: 999px; height: 8px;">
+                            <div style="width: 90%; height: 8px; background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); border-radius: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">Technology Stack</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <span class="skill-tag">ROS</span>
+                <span class="skill-tag">C++</span>
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">OpenCV</span>
+                <span class="skill-tag">PCL</span>
+                <span class="skill-tag">STM32</span>
+                <span class="skill-tag">FPGA</span>
+                <span class="skill-tag">Altium Designer</span>
+                <span class="skill-tag">SolidWorks</span>
+                <span class="skill-tag">MATLAB</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Achievements -->
+    <div class="card-modal" id="modal2">
+        <div class="modal-close" onclick="closeModal('modal2')">✕</div>
+        <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 3rem; font-weight: bold; margin-bottom: 16px; background: linear-gradient(to right, #fbbf24, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Hall of Fame</h2>
+            <p style="font-size: 1.25rem; color: #86868b;">A legacy built on innovation, determination, and excellence.</p>
+        </div>
+        
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 40px 0;">
+        
+        <div style="margin-bottom: 40px;">
+            <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">Competition Performance</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin-bottom: 32px;">
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 3rem; font-weight: bold; margin-bottom: 8px;">
+                        <span style="background: linear-gradient(to right, #fbbf24, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">12</span>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #86868b;">Total Competitions</div>
+                </div>
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 3rem; font-weight: bold; margin-bottom: 8px;">
+                        <span style="background: linear-gradient(to right, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">8</span>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #86868b;">Awards Won</div>
+                </div>
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 3rem; font-weight: bold; margin-bottom: 8px;">
+                        <span style="background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">67%</span>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #86868b;">Win Rate</div>
+                </div>
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 3rem; font-weight: bold; margin-bottom: 8px;">
+                        <span style="background: linear-gradient(to right, #ec4899, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">3</span>
+                    </div>
+                    <div style="font-size: 0.875rem; color: #86868b;">National Champions</div>
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">Award Timeline</h3>
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <div class="stat-card">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 1.875rem; margin-right: 12px;">🥇</span>
+                                <span style="font-size: 0.875rem; color: #2997ff; font-weight: bold;">2025</span>
+                            </div>
+                            <h4 style="font-size: 1.5rem; font-weight: bold; color: white; margin-bottom: 8px;">CRAIC National Championship</h4>
+                            <p style="color: #86868b; margin-bottom: 12px;">First Prize · Advanced Robotics Category</p>
+                        </div>
+                        <div style="text-align: right; margin-left: 16px;">
+                            <div style="font-size: 2.25rem; font-weight: bold; color: #fbbf24;">#1</div>
+                            <div style="font-size: 0.75rem; color: #86868b;">out of 89</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 1.875rem; margin-right: 12px;">🥈</span>
+                                <span style="font-size: 0.875rem; color: #2997ff; font-weight: bold;">2025</span>
+                            </div>
+                            <h4 style="font-size: 1.5rem; font-weight: bold; color: white; margin-bottom: 8px;">RoboCup China Open</h4>
+                            <p style="color: #86868b; margin-bottom: 12px;">Second Prize · Logistics League</p>
+                        </div>
+                        <div style="text-align: right; margin-left: 16px;">
+                            <div style="font-size: 2.25rem; font-weight: bold; color: #d1d5db;">#2</div>
+                            <div style="font-size: 0.75rem; color: #86868b;">out of 64</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 1.875rem; margin-right: 12px;">🥇</span>
+                                <span style="font-size: 0.875rem; color: #2997ff; font-weight: bold;">2023</span>
+                            </div>
+                            <h4 style="font-size: 1.5rem; font-weight: bold; color: white; margin-bottom: 8px;">WHU University Games</h4>
+                            <p style="color: #86868b;">Champion · Engineering Innovation Track</p>
+                        </div>
+                        <div style="text-align: right; margin-left: 16px;">
+                            <div style="font-size: 2.25rem; font-weight: bold; color: #fbbf24;">#1</div>
+                            <div style="font-size: 0.75rem; color: #86868b;">out of 28</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Technical Capability -->
+    <div class="card-modal" id="modal3">
+        <div class="modal-close" onclick="closeModal('modal3')">✕</div>
+        <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 3rem; font-weight: bold; margin-bottom: 16px; background: linear-gradient(to right, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Technical Excellence</h2>
+            <p style="font-size: 1.25rem; color: #86868b;">Battle-tested systems refined through countless competitions.</p>
+        </div>
+        
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 40px 0;">
+        
+        <div style="margin-bottom: 40px;">
+            <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">Core Technical Capabilities</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+                <div class="stat-card">
+                    <div style="display: flex; align-items: center; justify-between; margin-bottom: 16px;">
+                        <h4 style="font-size: 1.125rem; font-weight: bold; color: white;">Perception Systems</h4>
+                        <span style="font-size: 1.5rem; font-weight: bold; color: #10b981;">98%</span>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #86868b; margin-bottom: 16px;">Multi-sensor fusion for robust environment understanding</p>
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-between; font-size: 0.75rem; margin-bottom: 4px;">
+                            <span style="color: white;">LiDAR Processing</span>
+                            <span style="color: #86868b;">98%</span>
+                        </div>
+                        <div style="width: 100%; background: #2a2a2e; border-radius: 999px; height: 6px;">
+                            <div style="width: 98%; height: 6px; background: linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius: 8px;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-between; font-size: 0.75rem; margin-bottom: 4px;">
+                            <span style="color: white;">Computer Vision</span>
+                            <span style="color: #86868b;">96%</span>
+                        </div>
+                        <div style="width: 100%; background: #2a2a2e; border-radius: 999px; height: 6px;">
+                            <div style="width: 96%; height: 6px; background: linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div style="display: flex; align-items: center; justify-between; margin-bottom: 16px;">
+                        <h4 style="font-size: 1.125rem; font-weight: bold; color: white;">Navigation & Control</h4>
+                        <span style="font-size: 1.5rem; font-weight: bold; color: #2997ff;">95%</span>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #86868b; margin-bottom: 16px;">Intelligent path planning and precise motion control</p>
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-between; font-size: 0.75rem; margin-bottom: 4px;">
+                            <span style="color: white;">SLAM Accuracy</span>
+                            <span style="color: #86868b;">97%</span>
+                        </div>
+                        <div style="width: 100%; background: #2a2a2e; border-radius: 999px; height: 6px;">
+                            <div class="chart-bar" style="width: 97%; height: 6px;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-between; font-size: 0.75rem; margin-bottom: 4px;">
+                            <span style="color: white;">Motion Control</span>
+                            <span style="color: #86868b;">95%</span>
+                        </div>
+                        <div style="width: 100%; background: #2a2a2e; border-radius: 999px; height: 6px;">
+                            <div class="chart-bar" style="width: 95%; height: 6px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">Real-World Performance</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px;">
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 2.25rem; font-weight: bold; color: #10b981; margin-bottom: 8px;">99.2%</div>
+                    <div style="font-size: 0.875rem; color: #86868b;">System Uptime</div>
+                </div>
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 2.25rem; font-weight: bold; color: #2997ff; margin-bottom: 8px;">24ms</div>
+                    <div style="font-size: 0.875rem; color: #86868b;">Response Time</div>
+                </div>
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 2.25rem; font-weight: bold; color: #a855f7; margin-bottom: 8px;">500+</div>
+                    <div style="font-size: 0.875rem; color: #86868b;">Test Hours</div>
+                </div>
+                <div class="stat-card" style="text-align: center;">
+                    <div style="font-size: 2.25rem; font-weight: bold; color: #f97316; margin-bottom: 8px;">12</div>
+                    <div style="font-size: 0.875rem; color: #86868b;">Iterations</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Mission -->
+    <div class="card-modal" id="modal4">
+        <div class="modal-close" onclick="closeModal('modal4')">✕</div>
+        <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 3rem; font-weight: bold; margin-bottom: 16px; color: white;">Our Mission & Vision</h2>
+            <p style="font-size: 1.25rem; color: rgba(255,255,255,0.8);">To push the boundaries of autonomous robotics through practical application and relentless innovation.</p>
+        </div>
+        
+        <hr style="border-color: rgba(255,255,255,0.3); margin: 40px 0;">
+        
+        <div style="margin-bottom: 40px;">
+            <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">Core Values</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px;">
+                <div class="stat-card" style="background: rgba(41, 151, 255, 0.1); border-color: rgba(41, 151, 255, 0.3);">
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(59,130,246,0.2); display: flex; align-items: center; justify-content: center; margin-right: 16px; flex-shrink: 0;">
+                            <span style="font-size: 1.5rem;">🎯</span>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1.25rem; font-weight: bold; color: white; margin-bottom: 8px;">Self-Reliance</h4>
+                            <p style="color: rgba(255,255,255,0.7); font-size: 0.875rem;">We build everything from the ground up, never settling for off-the-shelf solutions.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.3);">
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(168,85,247,0.2); display: flex; align-items: center; justify-content: center; margin-right: 16px; flex-shrink: 0;">
+                            <span style="font-size: 1.5rem;">💪</span>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1.25rem; font-weight: bold; color: white; margin-bottom: 8px;">Perseverance</h4>
+                            <p style="color: rgba(255,255,255,0.7); font-size: 0.875rem;">Failure is feedback. Every setback is an opportunity to learn and adapt.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(16,185,129,0.2); display: flex; align-items: center; justify-content: center; margin-right: 16px; flex-shrink: 0;">
+                            <span style="font-size: 1.5rem;">🔬</span>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1.25rem; font-weight: bold; color: white; margin-bottom: 8px;">Truth-Seeking</h4>
+                            <p style="color: rgba(255,255,255,0.7); font-size: 0.875rem;">Data over intuition. Testing over assumption.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: rgba(251, 146, 60, 0.1); border-color: rgba(251, 146, 60, 0.3);">
+                    <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(251,146,60,0.2); display: flex; align-items: center; justify-content: center; margin-right: 16px; flex-shrink: 0;">
+                            <span style="font-size: 1.5rem;">⚡</span>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 1.25rem; font-weight: bold; color: white; margin-bottom: 8px;">Innovation</h4>
+                            <p style="color: rgba(255,255,255,0.7); font-size: 0.875rem;">We don't just follow trends—we create them.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">2026 Strategic Goals</h3>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div class="stat-card">
+                    <div style="display: flex; align-items: center; justify-between; margin-bottom: 8px;">
+                        <h4 style="font-size: 1.125rem; font-weight: 600; color: white;">RoboCup World Championship</h4>
+                        <span style="font-size: 0.875rem; color: #2997ff; font-weight: bold;">Q2 2026</span>
+                    </div>
+                    <div style="width: 100%; background: #2a2a2e; border-radius: 999px; height: 8px; margin-bottom: 8px;">
+                        <div class="chart-bar" style="width: 65%; height: 8px;"></div>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #86868b;">Progress: 65% • On track for qualification</p>
+                </div>
+                <div class="stat-card">
+                    <div style="display: flex; align-items: center; justify-between; margin-bottom: 8px;">
+                        <h4 style="font-size: 1.125rem; font-weight: 600; color: white;">Open-Source Framework</h4>
+                        <span style="font-size: 0.875rem; color: #10b981; font-weight: bold;">Q3 2026</span>
+                    </div>
+                    <div style="width: 100%; background: #2a2a2e; border-radius: 999px; height: 8px; margin-bottom: 8px;">
+                        <div style="width: 45%; height: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 8px;"></div>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #86868b;">Progress: 45% • Core modules in development</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        gsap.registerPlugin(ScrollTrigger, TextPlugin);
+
+        const tlHero = gsap.timeline();
+        tlHero.to(".hero-anim", { opacity: 1, y: 0, duration: 1.5, stagger: 0.2, ease: "back.out(1.2)" })
+              .to("#typewriter", { text: { value: "Redefining the boundaries of autonomous intelligence." }, duration: 2.5, ease: "none" });
+        
+        gsap.to(".hero-bg-img", { yPercent: 20, ease: "none", scrollTrigger: { trigger: "#hero", scrub: true } });
+
+        ScrollTrigger.create({
+            start: "top -50",
+            end: 99999,
+            toggleClass: { className: "nav-scrolled", targets: "#navbar" }
+        });
+
+        const textBlocks = document.querySelectorAll(".story-text");
+        const images = document.querySelectorAll(".visual-img");
+        textBlocks.forEach((block, i) => {
+            ScrollTrigger.create({
+                trigger: block, start: "top center", end: "bottom center",
+                onEnter: () => { 
+                    images.forEach(img => { img.classList.remove("opacity-90", "scale-100"); img.classList.add("opacity-0", "scale-90"); });
+                    if(images[i]) { images[i].classList.remove("opacity-0", "scale-90"); images[i].classList.add("opacity-90", "scale-100"); }
+                },
+                toggleClass: { targets: block, className: "opacity-100" } 
+            });
+        });
+
+        ScrollTrigger.batch(".reveal-item", {
+            onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, duration: 1.2, stagger: 0.15, ease: "back.out(1.2)", overwrite: true }),
+            start: "top 85%", 
+        });
+        
+        gsap.to(".footer-text", { opacity: 1, scrollTrigger: { trigger: ".footer-text", start: "top 80%", end: "center center", scrub: 1 }});
+
+        // Modal functionsokay
+        okay
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.getElementById('modalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', function() {
+            document.querySelectorAll('.card-modal').forEach(modal => modal.classList.remove('active'));
+            this.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    </script>
+</body>
+</html>

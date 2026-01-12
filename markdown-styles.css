@@ -1,0 +1,295 @@
+/* Markdown内容样式 - 保持与网站风格一致 */
+
+.markdown-content {
+    max-width: 100%;
+}
+
+/* 标题样式 */
+.markdown-content h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 1.5rem;
+    margin-top: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(41, 151, 255, 0.3);
+}
+
+.markdown-content h1:first-child {
+    margin-top: 0;
+}
+
+.markdown-content h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.markdown-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.markdown-content h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* 段落样式 */
+.markdown-content p {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* 粗体和斜体 */
+.markdown-content strong {
+    font-weight: 600;
+    color: white;
+}
+
+.markdown-content em {
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* 链接样式 */
+.markdown-content a {
+    color: #2997ff;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(41, 151, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.markdown-content a:hover {
+    color: #5ab3ff;
+    border-bottom-color: #2997ff;
+}
+
+/* 列表样式 */
+.markdown-content ul,
+.markdown-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.markdown-content ul {
+    list-style-type: disc;
+}
+
+.markdown-content ol {
+    list-style-type: decimal;
+}
+
+.markdown-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.markdown-content li::marker {
+    color: #2997ff;
+}
+
+/* 代码块样式 */
+.markdown-content code {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: #a855f7;
+}
+
+.markdown-content pre {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+
+.markdown-content pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #10b981;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+/* 引用块样式 */
+.markdown-content blockquote {
+    border-left: 4px solid #2997ff;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+    background: rgba(41, 151, 255, 0.05);
+    padding: 1rem;
+    border-radius: 0 8px 8px 0;
+}
+
+/* 表格样式 */
+.markdown-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.markdown-content thead {
+    background: rgba(41, 151, 255, 0.1);
+}
+
+.markdown-content th {
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: white;
+    border-bottom: 2px solid rgba(41, 151, 255, 0.3);
+}
+
+.markdown-content td {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.markdown-content tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* 水平线样式 */
+.markdown-content hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 2rem 0;
+}
+
+/* 图片样式 */
+.markdown-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1rem 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 内联代码高亮 */
+.markdown-content p code,
+.markdown-content li code {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+/* 特殊标记样式 */
+.markdown-content mark {
+    background: rgba(251, 146, 60, 0.2);
+    color: #fb923c;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* 键盘按键样式 */
+.markdown-content kbd {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 0.875rem;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* 删除线 */
+.markdown-content del {
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: line-through;
+}
+
+/* 任务列表样式 */
+.markdown-content input[type="checkbox"] {
+    margin-right: 0.5rem;
+    accent-color: #2997ff;
+}
+
+/* 脚注样式 */
+.markdown-content .footnote {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    vertical-align: super;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .markdown-content h1 {
+        font-size: 2rem;
+    }
+
+    .markdown-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .markdown-content h3 {
+        font-size: 1.25rem;
+    }
+
+    .markdown-content table {
+        font-size: 0.875rem;
+    }
+
+    .markdown-content pre {
+        padding: 0.75rem;
+    }
+}
+
+/* 添加平滑滚动效果 */
+.markdown-content {
+    scroll-behavior: smooth;
+}
+
+/* 选中文本样式 */
+.markdown-content ::selection {
+    background: rgba(41, 151, 255, 0.3);
+    color: white;
+}
+
+/* 特殊提示框样式（可选） */
+.markdown-content .info-box {
+    background: rgba(41, 151, 255, 0.1);
+    border-left: 4px solid #2997ff;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.markdown-content .warning-box {
+    background: rgba(251, 146, 60, 0.1);
+    border-left: 4px solid #fb923c;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.markdown-content .success-box {
+    background: rgba(16, 185, 129, 0.1);
+    border-left: 4px solid #10b981;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
