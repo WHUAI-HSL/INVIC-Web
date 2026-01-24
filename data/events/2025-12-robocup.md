@@ -1,15 +1,28 @@
-# RoboCup China Finals 2025
+# Team Milestone: Project Kickoff to Stable Release
 
-我们的团队在2025年RoboCup中国区总决赛中获得全国第二名的优异成绩。
+We marked the full cycle from kickoff to a stable, competition-ready baseline.
 
-## 比赛亮点
-- 使用自主研发的路径规划算法
-- 实现了24ms的实时响应
-- 在动态避障测试中表现出色
+## Stage Progress
+- Project kickoff and scope definition
+- Internal testing and iteration loops
+- Version freeze for release readiness
+- Functional stability confirmed
 
-## 团队感言
-这是团队成立以来的最好成绩，感谢所有成员的辛勤付出和武汉大学工程训练中心的大力支持。
+## Technical Milestones
+- Strategy layer completion
+- Vision pipeline stabilized
+- Communication and SDK integration
+- Reinforcement learning module completed
 
-## 媒体报道
-- [武汉大学新闻网报道](https://news.whu.edu.cn/xxx)
-- [比赛官方新闻](https://robocup.org/xxx)
+## Operations
+- Role alignment and responsibility mapping
+- Duty schedule and review rhythm
+- Documentation and registration delivered
+
+## Outreach
+- On-campus demo and public showcase
+- Talks and technical exchange
+- Team recruitment and onboarding
+
+## Resources
+- Venue, equipment, and mentor support secured

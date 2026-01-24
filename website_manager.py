@@ -71,7 +71,7 @@ class WebsiteManager:
                     break
             
             if not avatar_path:
-                avatar_path = "data/team/avatars/default.jpg"
+                avatar_path = "data/team/avatars/default.svg"
             
             member = {
                 "name": display_name,

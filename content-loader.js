@@ -1,6 +1,6 @@
 /**
- * 内容加载器 - 修复版
- * 修复：Publications列表显示黑屏问题
+ * Content loader - fixed version
+ * Fix: Publications list black screen issue
  */
 
 class ContentLoader {
@@ -8,6 +8,7 @@ class ContentLoader {
         this.config = config;
         this.cache = {};
         this.publicationsData = {};
+        this.eventsData = {};
     }
 
     async loadMarkdown(filepath) {
@@ -23,28 +24,28 @@ class ContentLoader {
             return text;
         } catch (error) {
             console.error('Error loading markdown:', error);
-            return `# 加载失败\n无法加载文件: ${filepath}`;
+            return `# Load failed\nUnable to load file: ${filepath}`;
         }
     }
 
     async renderTeamInModal() {
-        console.log('👥 渲染Team成员...');
+        console.log('👥 Rendering team members...');
         
         const modal = document.getElementById('modal1');
         if (!modal) {
-            console.warn('未找到modal1');
+            console.warn('modal1 not found');
             return;
         }
 
         const members = this.config.team.members;
         if (!members || members.length === 0) {
-            console.warn('没有team成员数据');
+            console.warn('No team member data');
             return;
         }
 
         let membersHtml = `
             <div style="margin-top: 40px;">
-                <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">团队成员</h3>
+                <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 24px; color: white;">Team Members</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
         `;
 
@@ -61,7 +62,7 @@ class ContentLoader {
                         <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid rgba(41,151,255,0.3);">
                             <img src="${member.avatar}" alt="${member.name}" 
                                  style="width: 100%; height: 100%; object-fit: cover;"
-                                 onerror="this.src='data/team/avatars/default.jpg'">
+                                 onerror="this.src='data/team/avatars/default.svg'">
                         </div>
                         <div style="flex: 1; min-width: 0;">
                             <h4 style="font-size: 1.25rem; font-weight: bold; color: white; margin-bottom: 4px;">${member.name}</h4>
@@ -73,7 +74,7 @@ class ContentLoader {
                         </div>
                     </div>
                     <div style="margin-top: 12px; text-align: right;">
-                        <span style="font-size: 0.75rem; color: #2997ff;">点击查看详情 →</span>
+                        <span style="font-size: 0.75rem; color: #2997ff;">View details →</span>
                     </div>
                 </div>
             `;
@@ -91,7 +92,7 @@ class ContentLoader {
             techStackSection.parentElement.insertBefore(membersDiv, techStackSection.parentElement.lastElementChild);
         }
 
-        console.log(`  ✓ 已加载 ${members.length} 位成员`);
+        console.log(`  ✓ Loaded ${members.length} members`);
     }
 
     extractBioPreview(markdown) {
@@ -108,17 +109,17 @@ class ContentLoader {
     }
 
     async renderPublications() {
-        console.log('📄 渲染Publications...');
+        console.log('📄 Rendering publications...');
         
         const container = document.getElementById('publications-list');
         if (!container) {
-            console.warn('未找到publications-list容器');
+            console.warn('publications-list not found');
             return;
         }
 
         const publications = this.config.publications;
         if (!publications || publications.length === 0) {
-            container.innerHTML = '<div style="text-align: center; margin-top: 2.5rem; color: #86868b; font-size: 0.875rem;">暂无论文内容</div>';
+            container.innerHTML = '<div style="text-align: center; margin-top: 2.5rem; color: #86868b; font-size: 0.875rem;">No publications yet</div>';
             return;
         }
 
@@ -134,7 +135,7 @@ class ContentLoader {
                 venue: pub.venue
             };
 
-            // 使用内联样式确保显示正确
+            // Use inline styles to ensure consistent rendering
             html += `
                 <div class="reveal-item group" 
                      style="border-bottom: 1px solid rgba(255,255,255,0.1); 
@@ -170,7 +171,7 @@ class ContentLoader {
                         <div style="flex-shrink: 0; display: flex; align-items: center;">
                             <span style="color: #86868b; font-size: 0.875rem; transition: color 0.3s ease;"
                                   class="read-more-text">
-                                查看详情 →
+                                View details →
                             </span>
                         </div>
                     </div>
@@ -180,7 +181,7 @@ class ContentLoader {
 
         container.innerHTML = html;
         
-        // 添加悬停效果到"查看详情"文字
+        // Add hover effect to "View details" text
         const readMoreTexts = container.querySelectorAll('.read-more-text');
         readMoreTexts.forEach(text => {
             text.parentElement.parentElement.parentElement.addEventListener('mouseenter', () => {
@@ -191,21 +192,21 @@ class ContentLoader {
             });
         });
         
-        console.log(`  ✓ 已加载 ${publications.length} 篇论文`);
+        console.log(`  ✓ Loaded ${publications.length} publications`);
     }
 
     async renderEvents() {
-        console.log('📅 渲染Events...');
+        console.log('📅 Rendering events...');
         
         const container = document.getElementById('events-timeline');
         if (!container) {
-            console.warn('未找到events-timeline容器');
+            console.warn('events-timeline not found');
             return;
         }
 
         const events = this.config.events;
         if (!events || events.length === 0) {
-            container.innerHTML = '<div style="color: #86868b; font-size: 0.875rem;">暂无事件记录</div>';
+            container.innerHTML = '<div style="color: #86868b; font-size: 0.875rem;">No events yet</div>';
             return;
         }
 
@@ -215,34 +216,42 @@ class ContentLoader {
             const content = await this.loadMarkdown(event.file);
             const parsed = this.parseEvent(content);
 
+            this.eventsData[event.file] = {
+                ...parsed,
+                date: event.date,
+                content
+            };
+
             const highlightClass = event.highlight ? 'bg-apple-blue' : 'bg-neutral-700';
 
             html += `
-                <div class="relative">
+                <div class="relative group cursor-pointer rounded-2xl px-4 py-3 transition-colors hover:bg-white/5"
+                     onclick="window.showEventDetail('${event.file}')">
                     <span class="absolute -left-[49px] top-2 w-4 h-4 rounded-full ${highlightClass} ring-4 ring-black"></span>
                     <span class="text-apple-gray text-sm">${event.date}</span>
                     <h3 class="text-2xl text-white font-bold mt-1">${parsed.title}</h3>
                     <p class="text-gray-400 mt-2 max-w-xl">${parsed.description}</p>
+                    <span class="text-apple-gray text-sm mt-3 inline-block transition-colors group-hover:text-white">View details →</span>
                 </div>
             `;
         }
 
         container.innerHTML = html;
-        console.log(`  ✓ 已加载 ${events.length} 个事件`);
+        console.log(`  ✓ Loaded ${events.length} events`);
     }
 
     async renderGallery() {
-        console.log('🖼️  渲染Gallery...');
+        console.log('🖼️  Rendering gallery...');
         
         const container = document.getElementById('gallery-grid');
         if (!container) {
-            console.warn('未找到gallery-grid容器');
+            console.warn('gallery-grid not found');
             return;
         }
 
         const images = this.config.gallery.images;
         if (!images || images.length === 0) {
-            container.innerHTML = '<div class="min-w-[300px] h-[400px] bg-neutral-800 rounded-2xl flex items-center justify-center text-gray-500 border border-white/10">暂无照片</div>';
+            container.innerHTML = '<div class="min-w-[300px] h-[400px] bg-neutral-800 rounded-2xl flex items-center justify-center text-gray-500 border border-white/10">No images yet</div>';
             return;
         }
 
@@ -254,13 +263,13 @@ class ContentLoader {
                      onclick="window.openImageModal('${img.src}', '${img.caption || ''}')">
                     <img src="${img.src}" alt="${img.caption || ''}" 
                          class="w-full h-full object-cover"
-                         onerror="this.parentElement.innerHTML='<div class=\\'flex items-center justify-center h-full bg-neutral-800 text-gray-500\\'>图片加载失败</div>'">
+                         onerror="this.parentElement.innerHTML='<div class=\\'flex items-center justify-center h-full bg-neutral-800 text-gray-500\\'>Image failed to load</div>'">
                 </div>
             `;
         }
 
         container.innerHTML = html;
-        console.log(`  ✓ 已加载 ${images.length} 张照片`);
+        console.log(`  ✓ Loaded ${images.length} images`);
     }
 
     parsePublication(markdown) {
@@ -311,7 +320,7 @@ class ContentLoader {
     }
 
     async init() {
-        console.log('🚀 开始加载内容...');
+        console.log('🚀 Loading content...');
         try {
             await Promise.all([
                 this.renderTeamInModal(),
@@ -319,14 +328,18 @@ class ContentLoader {
                 this.renderEvents(),
                 this.renderGallery()
             ]);
-            console.log('✅ 内容加载完成！');
+            console.log('✅ Content loaded');
         } catch (error) {
-            console.error('❌ 内容加载失败:', error);
+            console.error('❌ Content load failed:', error);
         }
     }
 
     getPublicationDetail(filepath) {
         return this.publicationsData[filepath];
+    }
+
+    getEventDetail(filepath) {
+        return this.eventsData[filepath];
     }
 }
 
@@ -382,6 +395,55 @@ window.closePublicationDetail = function() {
     document.body.style.overflow = '';
 };
 
+window.showEventDetail = function(filepath) {
+    if (!contentLoader) return;
+
+    const data = contentLoader.getEventDetail(filepath);
+    if (!data) return;
+
+    let detailModal = document.getElementById('event-detail-modal');
+    let overlay = document.getElementById('modalOverlay');
+
+    if (!detailModal) {
+        detailModal = document.createElement('div');
+        detailModal.id = 'event-detail-modal';
+        detailModal.className = 'card-modal';
+        document.body.appendChild(detailModal);
+    }
+
+    const htmlContent = marked.parse(data.content);
+
+    detailModal.innerHTML = `
+        <div class="modal-close" onclick="closeEventDetail()">✕</div>
+        <div style="margin-bottom: 24px;">
+            <div style="display: inline-block; padding: 6px 16px; background: rgba(41,151,255,0.1); 
+                        border: 1px solid rgba(41,151,255,0.3); border-radius: 20px; margin-bottom: 16px;">
+                <span style="color: #2997ff; font-weight: bold; font-size: 0.875rem;">${data.date}</span>
+            </div>
+            <h2 style="font-size: 2.5rem; font-weight: bold; margin-bottom: 16px; color: white; line-height: 1.2;">
+                ${data.title}
+            </h2>
+        </div>
+        
+        <div class="markdown-content" style="color: rgba(255,255,255,0.9); line-height: 1.8; font-size: 1rem;">
+            ${htmlContent}
+        </div>
+    `;
+
+    detailModal.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeEventDetail = function() {
+    const detailModal = document.getElementById('event-detail-modal');
+    const overlay = document.getElementById('modalOverlay');
+
+    if (detailModal) detailModal.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
+    document.body.style.overflow = '';
+};
+
 window.showMemberDetail = async function(bioFile) {
     if (!contentLoader) return;
 
@@ -428,13 +490,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         contentLoader = new ContentLoader(siteConfig);
         await contentLoader.init();
     } else {
-        console.error('siteConfig未定义，请确保config.js已正确加载');
+        console.error('siteConfig is undefined. Make sure config.js is loaded.');
     }
 });
 
 document.addEventListener('click', function(e) {
     if (e.target.id === 'modalOverlay') {
         closePublicationDetail();
+        closeEventDetail();
         closeMemberDetail();
     }
 });
