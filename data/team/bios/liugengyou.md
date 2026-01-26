@@ -1,7 +1,7 @@
 # Gengyou Liu
 
 **Role:** Team Lead  
-**School:** School of Electronic Information  
+**School:** Wuhan University · School of Electronic Information
 **Major:** Electronic Information Engineering
 
 **Focus**

@@ -1,7 +1,7 @@
 # Qixiang Han
 
 **Role:** Project Management  
-**School:** School of Electronic Information  
+**School:** Wuhan University · School of Electronic Information
 **Major:** Electronic Information Engineering
 
 **Focus**

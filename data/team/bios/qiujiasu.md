@@ -1,7 +1,7 @@
 # Jiasu Qiu
 
 **Role:** Technical Member  
-**School:** School of Electrical Engineering and Automation  
+**School:** Wuhan University · School of Electrical Engineering and Automation
 **Major:** Electrical Engineering and Automation (Excellent Engineer Program)
 
 **Focus**

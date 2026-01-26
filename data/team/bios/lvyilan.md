@@ -1,7 +1,7 @@
 # Yilan Lyu
 
 **Role:** Technical Member  
-**School:** School of Robotics  
+**School:** Wuhan University · School of Robotics
 **Major:** Automation
 
 **Focus**

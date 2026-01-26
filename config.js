@@ -1,5 +1,5 @@
 // 网站内容配置文件
-// 自动生成于: 2026-01-24 16:34:35
+// 自动生成于: 2026-01-26 15:15:45
 // 使用 python website_manager.py generate 重新生成此文件
 
 const siteConfig = {
@@ -8,51 +8,58 @@ const siteConfig = {
             {
                 "name": "Xiefeng Wu",
                 "role": "Technical Member",
-                "school": "School of Computer Science",
+                "school": "Wuhan University · School of Computer Science",
                 "avatar": "data/team/avatars/default.svg",
                 "bio": "data/team/bios/wuxiefeng.md"
             },
             {
-                "name": "Gengyou Liu",
-                "role": "Team Lead",
-                "school": "School of Electronic Information",
-                "avatar": "data/team/avatars/default.svg",
-                "bio": "data/team/bios/liugengyou.md"
-            },
-            {
-                "name": "Qixiang Han",
-                "role": "Project Management",
-                "school": "School of Electronic Information",
-                "avatar": "data/team/avatars/default.svg",
-                "bio": "data/team/bios/hanqixiang.md"
-            },
-            {
-                "name": "Zhiyang Han",
-                "role": "External Relations Lead",
-                "school": "School of Electrical Engineering and Automation",
-                "avatar": "data/team/avatars/default.svg",
-                "bio": "data/team/bios/hanzhiyang.md"
-            },
-            {
                 "name": "Yilan Lyu",
                 "role": "Technical Member",
-                "school": "School of Robotics",
+                "school": "Wuhan University · School of Robotics",
                 "avatar": "data/team/avatars/default.svg",
                 "bio": "data/team/bios/lvyilan.md"
             },
             {
-                "name": "Jiasu Qiu",
-                "role": "Technical Member",
-                "school": "School of Electrical Engineering and Automation",
+                "name": "Mingyu Hu",
+                "role": "Faculty Advisor",
+                "school": "Wuhan University",
                 "avatar": "data/team/avatars/default.svg",
-                "bio": "data/team/bios/qiujiasu.md"
+                "bio": "data/team/bios/humingyu.md"
+            },
+            {
+                "name": "Zhiyang Han",
+                "role": "External Relations Lead",
+                "school": "Wuhan University · School of Electrical Engineering and Automation",
+                "avatar": "data/team/avatars/default.svg",
+                "bio": "data/team/bios/hanzhiyang.md"
             },
             {
                 "name": "Zhenhao Ma",
                 "role": "Technical Member",
-                "school": "School of Geodesy and Geomatics",
+                "school": "Wuhan University · School of Geodesy and Geomatics",
                 "avatar": "data/team/avatars/default.svg",
                 "bio": "data/team/bios/mazhenghao.md"
+            },
+            {
+                "name": "Gengyou Liu",
+                "role": "Team Lead",
+                "school": "Wuhan University · School of Electronic Information",
+                "avatar": "data/team/avatars/default.svg",
+                "bio": "data/team/bios/liugengyou.md"
+            },
+            {
+                "name": "Jiasu Qiu",
+                "role": "Technical Member",
+                "school": "Wuhan University · School of Electrical Engineering and Automation",
+                "avatar": "data/team/avatars/default.svg",
+                "bio": "data/team/bios/qiujiasu.md"
+            },
+            {
+                "name": "Qixiang Han",
+                "role": "Project Management",
+                "school": "Wuhan University · School of Electronic Information",
+                "avatar": "data/team/avatars/default.svg",
+                "bio": "data/team/bios/hanqixiang.md"
             }
         ]
     },
@@ -61,17 +68,12 @@ const siteConfig = {
             "file": "data/publications/2025-development-plan.md",
             "year": "2025",
             "venue": "DEVELOPMENT"
-        },
-        {
-            "file": "data/publications/2025-cvpr-slam.md",
-            "year": "2025",
-            "venue": "CVPR"
         }
     ],
     "events": [
         {
-            "file": "data/events/2025-12-robocup.md",
-            "date": "Dec 2025",
+            "file": "data/events/2026-06-robocup-2026-incheon.md",
+            "date": "Jun 2026",
             "highlight": true
         }
     ],

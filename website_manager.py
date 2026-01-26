@@ -61,6 +61,10 @@ class WebsiteManager:
                 # 提取标题作为姓名
                 title_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
                 display_name = title_match.group(1) if title_match else name
+                role_match = re.search(r'^\*\*Role:\*\*\s*(.+)$', content, re.MULTILINE)
+                school_match = re.search(r'^\*\*School:\*\*\s*(.+)$', content, re.MULTILINE)
+                role = role_match.group(1).strip() if role_match else "Team Member"
+                school = school_match.group(1).strip() if school_match else "Wuhan University"
             
             # 查找对应的头像
             avatar_path = None
@@ -75,8 +79,8 @@ class WebsiteManager:
             
             member = {
                 "name": display_name,
-                "role": "Team Member",
-                "school": "School Name",
+                "role": role,
+                "school": school,
                 "avatar": avatar_path,
                 "bio": f"data/team/bios/{name}.md"
             }

@@ -1,7 +1,7 @@
 # Zhenhao Ma
 
 **Role:** Technical Member  
-**School:** School of Geodesy and Geomatics  
+**School:** Wuhan University · School of Geodesy and Geomatics
 **Major:** Navigation Engineering
 
 **Focus**
